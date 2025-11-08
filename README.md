@@ -53,12 +53,12 @@ Design a **website or mobile app** that helps patients simplify medical informat
 
 ## 👥 Team & Task Assignments
 
-| Member | Role | Responsibilities |
-|---------|------|------------------|
-| **Adams** | **Frontend Lead** | Build the main UI/UX, set up navigation, design patient-friendly pages (login, dashboard, upload, results). Focus on accessibility and responsive design. |
-| **Final** | **Backend & API Developer** | Set up authentication, database, and API endpoints. Handle secure data flow between the frontend, AI engine, and external medical APIs (WebMD, Harvard Health, etc.). |
+| Member          | Role | Responsibilities |
+|-----------------|------|------------------|
+| **Adams**       | **Frontend Lead** | Build the main UI/UX, set up navigation, design patient-friendly pages (login, dashboard, upload, results). Focus on accessibility and responsive design. |
+| **Finai**       | **Backend & API Developer** | Set up authentication, database, and API endpoints. Handle secure data flow between the frontend, AI engine, and external medical APIs (WebMD, Harvard Health, etc.). |
 | **Abdelrahman** | **AI & NLP Developer** | Build the medical translation engine. Implement term recognition, summarization, and context explanations using NLP or AI tools. |
-| **Kelvin** | **Project Manager & Integrations** | Coordinate tasks, ensure consistent communication, and manage integration between modules (frontend ↔ backend ↔ AI). Prepare final presentation/demo. |
+| **Kelvin**      | **Project Manager & Integrations** | Coordinate tasks, ensure consistent communication, and manage integration between modules (frontend ↔ backend ↔ AI). Prepare final presentation/demo. |
 
 ---
 
