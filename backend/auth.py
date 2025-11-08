@@ -20,7 +20,8 @@ class Auth0JWTBearerTokenValidator:
         url = f"{self.issuer}.well-known/jwks.json"
         data = urlopen(url)
         jwks = json.loads(data.read())
-        self.registry.import_key_set(jwks)
+        for key in jwks['keys']:
+            self.registry.import_key(key)
 
     def __call__(self, token_string):
         try:
