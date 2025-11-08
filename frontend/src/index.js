@@ -1,25 +1,19 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { Auth0Provider } from '@auth0/auth0-react';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { Auth0Provider } from "@auth0/auth0-react";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const domain = "dev-fufeub15o8ylzslm.us.auth0.com";
+const clientId = "MYyGr6UKBvMH5t3ZiQBh1Fu8IP7FnyYp";
+const audience = "https://api.medinfo-hackathon.com";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
-    <Auth0Provider
-    domain="https://api.medinfo-hackathon.com"
-    clientId="MYyGr6UKBvMH5t3ZiQBh1Fu8IP7FnyYp"
-    authorizationParams={{
-        redirect_uri: window.location.origin + '/dashboard',
-        audience: "https://api.medinfo-hackathon.com"
-     }}
-    >
+  <Auth0Provider
+    domain={domain}
+    clientId={clientId}
+    authorizationParams={{ redirect_uri: window.location.origin, audience }}
+  >
     <App />
-    </Auth0Provider>
-  </React.StrictMode>
+  </Auth0Provider>
 );
-
-
-reportWebVitals();
