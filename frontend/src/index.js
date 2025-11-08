@@ -10,11 +10,11 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <Auth0Provider
-      domain="YOUR_AUTH0_DOMAIN" // Your key from Step 2
-      clientId="YOUR_AUTH0_CLIENT_ID" // Your key from Step 2
+      domain="dev-fufeub15o8ylzslm.us.auth0.com" // <-- FIX THIS
+      clientId="MYyGr6UKBvMH5t3ZiQBh1Fu8IP7FnyYp" // <-- FIX THIS
       authorizationParams={{
         redirect_uri: window.location.origin + '/dashboard',
-        audience: "https://api.medinfo-hackathon.com" // Your API Identifier from Step 2
+        audience: "https://api.medinfo-hackathon.com" // <-- CHECK THIS
       }}
     >
       <App />
