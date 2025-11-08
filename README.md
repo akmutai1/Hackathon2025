@@ -98,8 +98,3 @@ This project bridges the gap between **complex medical data** and **patient unde
 - Submit all source code and documentation via GitHub.
 
 ---
-
-**Organizer:** Medtronic  
-**Theme:** Patient Empowerment through Health Literacy
-
-This is test commit 
