@@ -13,7 +13,7 @@ root.render(
       domain="dev-fufeub15o8ylzslm.us.auth0.com" // <-- FIX THIS
       clientId="MYyGr6UKBvMH5t3ZiQBh1Fu8IP7FnyYp" // <-- FIX THIS
       authorizationParams={{
-        redirect_uri: window.location.origin + '/dashboard',
+        redirect_uri: window.location.origin,
         audience: "https://api.medinfo-hackathon.com" // <-- CHECK THIS
       }}
     >
