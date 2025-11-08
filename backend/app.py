@@ -1,102 +1,94 @@
-# app.py (Flask Backend)
+# /backend/app.py - (Complete File)
+import io
+import os
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+from dotenv import load_dotenv
+import PyPDF2
 
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt
-from flask_cors import CORS # Keep this import
-from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity
-# NOTE: Removed the extra 'from flask_cors import CORS' line
+# Import our custom auth and AI modules
+from auth import require_auth
+import translation_engine
 
-# --- 1. Initialization ---
+# Load environment variables from .env file
+load_dotenv()
+
+# --- App Initialization ---
 app = Flask(__name__)
-# Crucial: Allows React (port 3000) to talk to Flask (port 5000)
-CORS(app) # Keep this one CORS initialization
 
-# Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# JWT Key - MUST BE KEPT SECRET
-app.config['JWT_SECRET_KEY'] = 'your_super_secret_flask_key_12345'
-
-db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
-jwt = JWTManager(app)
+# Enable CORS to allow your React app (from http://localhost:3000) to make requests
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 
-# --- 2. Database Model ---
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+# --- API Endpoints ---
+
+@app.route("/api/public")
+def public():
+    """A public endpoint that anyone can access."""
+    return jsonify(message="Hello from a public endpoint! No login required.")
 
 
-# Create the database tables if they don't exist
-with app.app_context():
-    db.create_all()
+@app.route("/api/private")
+@require_auth(None)  # This decorator protects the route
+def private():
+    """A private endpoint that requires a valid Auth0 token."""
+    return jsonify(message="Hello from a private endpoint! You are logged in.")
 
 
-# --- 3. API Endpoints ---
-
-@app.route('/api/signup', methods=['POST'])
-def signup():
-    """Handles new user registration."""
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-
-    if not email or not password:
-        return jsonify({"error": "Missing email or password"}), 400
-
-    if User.query.filter_by(email=email).first():
-        return jsonify({"error": "Signup failed. Email may already be in use."}), 400
-
-    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    new_user = User(email=email, password_hash=hashed_password)
+@app.route("/api/upload", methods=["POST"])
+@require_auth(None)  # This decorator protects the route
+def upload_file():
+    """
+    The main endpoint to handle file/text uploads.
+    It extracts text, sends it to the AI, and returns the simplified JSON.
+    [Core Functionality 2, 3, 4]
+    """
+    extracted_text = ""
 
     try:
-        db.session.add(new_user)
-        db.session.commit()
+        # Check for text input first (from JSON)
+        if request.is_json and 'text' in request.json:
+            print("--- BACKEND: Received TEXT data ---")
+            extracted_text = request.json['text']
 
-        # Token creation is optional on signup, but useful for auto-login
-        access_token = create_access_token(identity=new_user.id)
+        # Check for file input (from FormData)
+        elif 'file' in request.files:
+            print("--- BACKEND: Received FILE data ---")
+            file = request.files['file']
 
-        return jsonify({
-            "message": "User created successfully",
-            "token": access_token  # Frontend ignores this if it redirects to login
-        }), 201
-    except Exception:
-        db.session.rollback()
-        return jsonify({"error": "An internal server error occurred."}), 500
+            if file.content_type == 'application/pdf':
+                # Use PyPDF2 to extract text [Core Functionality 2]
+                stream = io.BytesIO(file.read())
+                reader = PyPDF2.PdfReader(stream)
+                for page in reader.pages:
+                    extracted_text += page.extract_text()
+            else:
+                return jsonify(error="Invalid file type", details="Please upload a PDF."), 400
 
+        else:
+            return jsonify(error="No input data", details="Please provide text or a PDF file."), 400
 
-@app.route('/api/login', methods=['POST'])
-def login():
-    """Handles user login."""
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
+        # Check if text extraction was successful
+        if not extracted_text:
+            return jsonify(error="Empty report", details="Could not find any text to simplify."), 400
 
-    user = User.query.filter_by(email=email).first()
+        # --- Send extracted text to the AI Engine [Core Functionality 3, 4] ---
+        print("--- BACKEND: Sending text to AI Engine ---")
 
-    if user and bcrypt.check_password_hash(user.password_hash, password):
-        # Generate JWT token
-        access_token = create_access_token(identity=user.id)
-        return jsonify({
-            "message": "Login successful",
-            "token": access_token
-        })
-    else:
-        return jsonify({"error": "Invalid login credentials"}), 401
+        # This calls Abdelrahman's function
+        simplified_data = translation_engine.simplify_medical_text(extracted_text)
 
+        print("--- BACKEND: Received simplified data from AI ---")
 
-@app.route('/api/verify', methods=['GET'])
-@jwt_required()
-def verify():
-    """Checks if the provided JWT token in the header is valid."""
-    # If this point is reached, the token is valid
-    return jsonify({"isValid": True}), 200
+        # Return the AI's JSON response to the frontend
+        return jsonify(simplified_data)
+
+    except Exception as e:
+        print(f"--- BACKEND: ERROR --- \n{e}")
+        return jsonify(error="Server processing error", details=str(e)), 500
 
 
+# --- Run the App ---
 if __name__ == '__main__':
-    # Flask runs on port 5000
+    # Runs the server on http://127.0.0.1:5000
     app.run(debug=True, port=5000)
