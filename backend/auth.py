@@ -14,6 +14,7 @@ class Auth0JWTBearerTokenValidator:
         self.issuer = f"https://{domain}/"
         self.audience = audience
         self.registry = JWKRegistry()
+        self.realm = "api"
         self.update_jwks()
 
     def update_jwks(self):
